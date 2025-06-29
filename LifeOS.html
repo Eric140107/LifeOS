@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeOS - Seu Sistema Operacional Financeiro</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --cor-fundo: #000000; 
+            --cor-fundo-card: #0d1117; 
+            --cor-primaria: #00f6ff;
+            --cor-secundaria: #f000b8; 
+            --cor-texto: #e0f2f1; 
+            --cor-texto-suave: #8892b0;
+            --cor-borda-neon: rgba(0, 246, 255, 0.4); 
+            --cor-sucesso: #00ff87; 
+            --cor-perigo: #ff4d9d;
+            --brilho-primario: 0 0 7px var(--cor-primaria), 0 0 15px var(--cor-primaria), 0 0 25px var(--cor-primaria);
+            --brilho-secundario: 0 0 7px var(--cor-secundaria), 0 0 15px var(--cor-secundaria);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--cor-fundo-card); }
+        ::-webkit-scrollbar-thumb { background: var(--cor-primaria); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00c4cc; }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--cor-fundo); 
+            color: var(--cor-texto); 
+            line-height: 1.6; 
+            background-image: radial-gradient(rgba(0, 246, 255, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+        
+        .cabecalho-principal { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; margin-bottom: 2rem; border-bottom: 1px solid var(--cor-borda-neon); box-shadow: 0 5px 15px -10px var(--cor-borda-neon); }
+        header h1 { font-family: 'Orbitron', sans-serif; color: var(--cor-primaria); font-size: 2rem; text-shadow: var(--brilho-primario); letter-spacing: 4px; animation: glow 1.5s ease-in-out infinite alternate; }
+        @keyframes glow { from { text-shadow: 0 0 5px #00aaff, 0 0 10px #00aaff; } to { text-shadow: 0 0 20px #00f6ff, 0 0 35px #00f6ff; } }
+        
+        .container-botoes-topo { display: flex; gap: 0.5rem; }
+        .btn-icon { background: none; border: none; color: var(--cor-texto-suave); cursor: pointer; padding: 0.5rem; transition: all 0.3s; text-decoration: none; }
+        .btn-icon:hover { color: var(--cor-primaria); text-shadow: var(--brilho-primario); transform: scale(1.1); }
+        
+        .nav-meses { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; justify-content: center; }
+        .btn-mes { padding: 0.5rem 1rem; border: 1px solid var(--cor-borda-neon); background-color: transparent; color: var(--cor-texto-suave); font-family: 'Orbitron'; cursor: pointer; transition: all 0.3s; border-radius: 4px; }
+        .btn-mes.ativo { color: var(--cor-fundo); background-color: var(--cor-primaria); border-color: var(--cor-primaria); box-shadow: var(--brilho-primario); }
+        
+        .secao { background-color: rgba(13, 17, 23, 0.8); backdrop-filter: blur(8px); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; box-shadow: 0 0 12px rgba(0, 246, 255, 0.2); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .secao:hover { transform: translateY(-3px); box-shadow: 0 0 20px var(--cor-borda-neon); }
+        .secao h2 { font-family: 'Orbitron', sans-serif; font-size: 1.25rem; margin-bottom: 1.5rem; color: var(--cor-primaria); display: flex; align-items: center; gap: 0.75rem; text-shadow: 0 0 3px var(--cor-primaria); }
+        .input, .select { padding: 0.75rem; border: 1px solid var(--cor-borda-neon); border-radius: 4px; font-size: 1rem; width: 100%; background-color: #0d1117; color: var(--cor-texto); }
+        .btn { padding: 0.75rem 1.5rem; border: 1px solid var(--cor-primaria); border-radius: 4px; background-color: transparent; color: var(--cor-primaria); font-family: 'Orbitron'; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;}
+        #form-transacao { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; align-items: flex-end; }
+        .form-grupo { display: flex; flex-direction: column; gap: 0.5rem; }
+        .form-grupo label { font-size: 0.875rem; font-weight: 500; color: var(--cor-texto-suave); }
+        .tipo-transacao { display: flex; gap: 0.5rem; background-color: var(--cor-fundo-card); border-radius: 4px; padding: 4px; }
+        .tipo-transacao-label { flex: 1; text-align: center; padding: 0.5rem; border-radius: 4px; cursor: pointer; transition: all 0.3s; }
+        .tipo-transacao-label input { display: none; }
+        .tipo-transacao-label.ativo { background-color: var(--cor-primaria); color: var(--cor-fundo); box-shadow: var(--brilho-primario); }
+
+        #resumo-geral { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1.5rem; text-align: center; }
+        #resumo-geral h3 { font-family: 'Orbitron', font-size: 0.8rem; color: var(--cor-texto-suave); margin-bottom: 0.5rem; text-transform: uppercase;}
+        #resumo-geral p { font-size: 1.6rem; font-weight: 700; text-shadow: 0 0 8px currentColor; }
+        
+        .dashboard-grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 2rem; }
+        @media (min-width: 1024px) { .dashboard-grid { grid-template-columns: repeat(3, 1fr); } #secao-categorias { grid-column: span 2; } }
+
+        .card-categoria { box-shadow: 0 0 5px rgba(0, 246, 255, 0.2); background-color: transparent; padding: 1.5rem; border-radius: 4px; display: flex; flex-direction: column; gap: 1rem; }
+        .card-title-container h3 { color: var(--cor-primaria); display: flex; align-items: center; gap: 0.5rem; font-family: 'Orbitron'; }
+        
+        #historico-transacoes table { width: 100%; border-collapse: collapse; }
+        #historico-transacoes th, #historico-transacoes td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--cor-borda-neon); }
+        .valor-saida { color: var(--cor-perigo); }
+        .valor-entrada { color: var(--cor-sucesso); }
+        .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #374151; transition: .4s; border-radius: 24px; border: 1px solid var(--cor-borda-neon); }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--cor-primaria); box-shadow: var(--brilho-primario); }
+        input:checked + .slider:before { transform: translateX(26px); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="cabecalho-principal">
+            <header><h1>LifeOS</h1></header>
+            <div class="container-botoes-topo">
+                <a href="./TaskMatrix.html" class="btn-icon" title="Acessar Matriz de Tarefas"><i data-lucide="list-checks"></i></a>
+                <button id="btn-configuracoes" class="btn-icon" title="Abrir Configurações"><i data-lucide="settings"></i></button>
+            </div>
+        </div>
+
+        <section id="secao-config" class="secao" style="display: none;">
+             <h2><i data-lucide="settings-2"></i>Configurações Globais</h2>
+             <div class="form-grupo"><label for="toggle-pensao" style="font-family: 'Orbitron';">Pensão Alimentícia</label><label class="switch"><input type="checkbox" id="toggle-pensao"><span class="slider"></span></label></div>
+             <div class="form-grupo" id="grupo-valor-pensao" style="display: none; margin-top: 1rem;"><label for="valor-pensao">Valor da Pensão (mín. R$ 400)</label><input type="number" id="valor-pensao" class="input" min="400" step="0.01"></div>
+        </section>
+
+        <nav id="abas-meses" class="nav-meses"></nav>
+        
+        <section class="secao">
+            <h2><i data-lucide="plus-circle"></i>Adicionar Nova Transação (<span id="mes-ativo-titulo"></span>)</h2>
+            <form id="form-transacao">
+                 <div class="form-grupo" style="grid-column: 1 / -1;"><label for="descricao">Descrição</label><input type="text" id="descricao" class="input" required></div>
+                <div class="form-grupo"><label for="valor">Valor (R$)</label><input type="number" id="valor" class="input" step="0.01" required></div>
+                <div class="form-grupo"><label for="data">Data</label><input type="date" id="data" class="input" required></div>
+                <div class="form-grupo"><label>Tipo</label><div class="tipo-transacao"><label class="tipo-transacao-label ativo"><input type="radio" name="tipo" value="entrada" checked> Entrada</label><label class="tipo-transacao-label"><input type="radio" name="tipo" value="saida"> Saída</label></div></div>
+                <div class="form-grupo" id="grupo-categoria" style="display: none;"><label for="categoria">Categoria</label><select id="categoria" class="select"></select></div>
+                <button type="submit" class="btn" style="height: fit-content; grid-column: 1 / -1;">Adicionar</button>
+            </form>
+        </section>
+
+        <section class="secao">
+            <h2><i data-lucide="activity"></i>Painel de Análise Mensal</h2>
+            <div id="resumo-geral">
+                <div><h3>Saldo Anterior</h3><p id="resumo-saldo-anterior" style="color: var(--cor-secundaria);"></p></div>
+                <div><h3>Entradas</h3><p id="resumo-entradas" style="color: var(--cor-sucesso);"></p></div>
+                <div><h3>Saídas</h3><p id="resumo-saidas" style="color: var(--cor-perigo);"></p></div>
+                <div><h3>Saldo Final</h3><p id="resumo-saldo-final" style="color: var(--cor-primaria);"></p></div>
+            </div>
+        </section>
+
+        <div class="dashboard-grid">
+            <section id="secao-categorias" class="secao">
+                <h2><i data-lucide="target"></i>Protocolos de Meta</h2>
+                <div id="categorias-container"></div>
+            </section>
+            <section id="secao-grafico" class="secao">
+                <h2><i data-lucide="bar-chart-3"></i>Distribuição</h2>
+                <div class="chart-container"><canvas id="grafico-despesas"></canvas></div>
+                <div id="grafico-placeholder" style="display: none;"><p>Sem dados de saída.</p></div>
+            </section>
+        </div>
+
+        <section class="secao">
+            <h2><i data-lucide="history"></i>Log de Transações do Mês</h2>
+            <div id="historico-transacoes" style="overflow-x: auto;">
+                <table><thead><tr><th>Data</th><th>Descrição</th><th>Protocolo</th><th>Valor</th><th>Anular</th></tr></thead><tbody></tbody></table>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const ESTRUTURA_FINANCEIRA = {
+                casa: { nome: 'Habitação', tipo: 'percentual', valor: 30, icone: 'home' },
+                investimento: { nome: 'Investimento', tipo: 'percentual', valor: 25, icone: 'trending-up' },
+                peDeMeia: { nome: 'Reserva', tipo: 'percentual', valor: 25, icone: 'shield' },
+                alimentacao: { nome: 'Sustento', tipo: 'percentual', valor: 10, icone: 'pizza' },
+                lazer: { nome: 'Lazer', tipo: 'percentual', valor: 5, icone: 'gamepad-2' },
+                cuidadosPessoais: { nome: 'Pessoal', tipo: 'percentual', valor: 5, icone: 'sparkles' },
+                pensao: { nome: 'Pensão', tipo: 'fixo', valor: 400, icone: 'baby' },
+            };
+            
+            let appState = { dadosMensais: {}, mesAtivo: '', pagaPensao: false, valorPensao: 400 };
+            let meuGrafico = null;
+
+            const formTransacao = document.getElementById('form-transacao');
+            const togglePensao = document.getElementById('toggle-pensao');
+            const btnConfiguracoes = document.getElementById('btn-configuracoes');
+            const secaoConfig = document.getElementById('secao-config');
+            const valorPensaoInput = document.getElementById('valor-pensao');
+            const tipoLabels = document.querySelectorAll('.tipo-transacao-label');
+            
+            const formatarMoeda = (valor) => (valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const salvarEstado = () => localStorage.setItem('lifeOS_ultimate', JSON.stringify(appState));
+            const formatarMesIdParaExibicao = (mesId) => { const [ano, mes] = mesId.split('-'); return new Date(ano, mes - 1).toLocaleString('pt-BR', { month: 'short', year: 'numeric' }).replace(/^\w/, c => c.toUpperCase()); };
+            const getMesAnteriorId = (mesId) => { const [ano, mes] = mesId.split('-').map(Number); const data = new Date(ano, mes - 1, 1); data.setMonth(data.getMonth() - 1); return `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`; };
+            
+            const calcularSaldoFinalMes = (mesId) => {
+                if (!appState.dadosMensais[mesId]) return 0;
+                const saldoAnterior = calcularSaldoFinalMes(getMesAnteriorId(mesId));
+                const transacoes = appState.dadosMensais[mesId].transacoes;
+                const entradas = transacoes.filter(t => t.tipo === 'entrada').reduce((acc, t) => acc + t.valor, 0);
+                const saidas = transacoes.filter(t => t.tipo === 'saida').reduce((acc, t) => acc + t.valor, 0);
+                return saldoAnterior + entradas - saidas;
+            };
+
+            const renderizarUI = () => {
+                togglePensao.checked = appState.pagaPensao;
+                valorPensaoInput.value = appState.valorPensao;
+                document.getElementById('grupo-valor-pensao').style.display = appState.pagaPensao ? 'block' : 'none';
+                
+                const selectCategoria = document.getElementById('categoria');
+                selectCategoria.innerHTML = '';
+                for (const id in ESTRUTURA_FINANCEIRA) {
+                    if (id === 'pensao' && !appState.pagaPensao) continue;
+                    const cat = ESTRUTURA_FINANCEIRA[id];
+                    const option = document.createElement('option');
+                    option.value = id; option.textContent = cat.nome;
+                    selectCategoria.appendChild(option);
+                }
+
+                const abasMesesContainer = document.getElementById('abas-meses');
+                abasMesesContainer.innerHTML = ''; 
+                const meses = Object.keys(appState.dadosMensais).sort().reverse(); 
+                meses.forEach(mesId => { const btn = document.createElement('button'); btn.className = 'btn-mes'; btn.textContent = formatarMesIdParaExibicao(mesId); btn.dataset.mesId = mesId; if (mesId === appState.mesAtivo) btn.classList.add('ativo'); btn.addEventListener('click', () => { appState.mesAtivo = mesId; salvarEstado(); renderizarUI(); }); abasMesesContainer.appendChild(btn); }); 
+                const btnProximo = document.createElement('button'); btnProximo.id = 'btn-proximo-mes'; btnProximo.className = 'btn-mes'; btnProximo.innerHTML = '<i data-lucide="plus"></i> Novo Mês'; btnProximo.addEventListener('click', criarProximoMes); abasMesesContainer.appendChild(btnProximo);
+
+                document.getElementById('mes-ativo-titulo').textContent = formatarMesIdParaExibicao(appState.mesAtivo);
+                const dataInput = document.getElementById('data'); 
+                const [ano, mes] = appState.mesAtivo.split('-'); 
+                dataInput.min = `${ano}-${mes}-01`; 
+                dataInput.max = `${ano}-${mes}-${new Date(ano, mes, 0).getDate()}`; 
+                if (!dataInput.value || !dataInput.value.startsWith(appState.mesAtivo)) { dataInput.value = `${appState.mesAtivo}-01`; }
+                
+                const transacoesDoMes = appState.dadosMensais[appState.mesAtivo].transacoes;
+                const mesAnteriorId = getMesAnteriorId(appState.mesAtivo);
+                const saldoAnterior = calcularSaldoFinalMes(mesAnteriorId);
+                const entradasDoMes = transacoesDoMes.filter(t => t.tipo === 'entrada').reduce((acc, t) => acc + t.valor, 0);
+                const saidasDoMes = transacoesDoMes.filter(t => t.tipo === 'saida').reduce((acc, t) => acc + t.valor, 0);
+                const saldoFinal = saldoAnterior + entradasDoMes - saidasDoMes;
+                
+                document.getElementById('resumo-saldo-anterior').textContent = formatarMoeda(saldoAnterior); 
+                document.getElementById('resumo-entradas').textContent = formatarMoeda(entradasDoMes); 
+                document.getElementById('resumo-saidas').textContent = formatarMoeda(saidasDoMes); 
+                document.getElementById('resumo-saldo-final').textContent = formatarMoeda(saldoFinal);
+                
+                const categoriasContainer = document.getElementById('categorias-container');
+                categoriasContainer.innerHTML = '';
+                
+                let valorFixoTotal = appState.pagaPensao ? appState.valorPensao : 0;
+                let baseParaPercentual = entradasDoMes - valorFixoTotal;
+
+                const gastosPorCategoria = {};
+                for (const id in ESTRUTURA_FINANCEIRA) {
+                    if (id === 'pensao' && !appState.pagaPensao) continue;
+                    const cat = ESTRUTURA_FINANCEIRA[id];
+                    let meta = cat.tipo === 'fixo' ? appState.valorPensao : baseParaPercentual * (cat.valor / 100);
+                    if (meta < 0) meta = 0;
+                    
+                    const gasto = transacoesDoMes.filter(t => t.tipo === 'saida' && t.categoria === id).reduce((acc, t) => acc + t.valor, 0);
+                    gastosPorCategoria[id] = gasto;
+                    
+                    const card = document.createElement('div'); 
+                    card.className = 'card-categoria'; 
+                    card.innerHTML = `<div class="card-title-container"><h3><i data-lucide="${cat.icone}"></i> ${cat.nome}</h3></div><div><div class="info-financeira">Gasto: <span class="valor-saida">${formatarMoeda(gasto)}</span></div><div class="info-financeira">Meta: <span>${formatarMoeda(meta)}</span></div></div><div class="progresso-barra-container"><div class="progresso-barra"></div></div>`;
+                    categoriasContainer.appendChild(card);
+                    
+                    const barra = card.querySelector('.progresso-barra'); 
+                    const percentualGasto = meta > 0 ? (gasto / meta) * 100 : 0; 
+                    if(barra) {
+                        barra.style.width = `${Math.min(percentualGasto, 100)}%`;
+                        if (percentualGasto > 100) { barra.style.backgroundColor = 'var(--cor-perigo)'; } 
+                        else if (percentualGasto > 80) { barra.style.backgroundColor = 'var(--cor-secundaria)'; } 
+                        else { barra.style.backgroundColor = 'var(--cor-primaria)'; }
+                    }
+                }
+                atualizarGrafico(gastosPorCategoria);
+                const tbody = document.querySelector('#historico-transacoes tbody'); 
+                tbody.innerHTML = '';
+                transacoesDoMes.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(t => { 
+                    const tr = document.createElement('tr'); 
+                    tr.innerHTML = `<td>${new Date(t.data + 'T00:00:00').toLocale
