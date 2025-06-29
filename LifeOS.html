@@ -260,4 +260,67 @@
                 tbody.innerHTML = '';
                 transacoesDoMes.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(t => { 
                     const tr = document.createElement('tr'); 
-                    tr.innerHTML = `<td>${new Date(t.data + 'T00:00:00').toLocale
+                    tr.innerHTML = `<td>${new Date(t.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td><td>${t.descricao}</td><td>${t.categoria ? ESTRUTURA_FINANCEIRA[t.categoria].nome : 'Entrada'}</td><td class="${t.tipo === 'entrada' ? 'valor-entrada' : 'valor-saida'}">${t.tipo === 'entrada' ? '+' : '-'} ${formatarMoeda(t.valor)}</td><td><button class="btn-excluir btn-icon" data-id="${t.id}"><i data-lucide="x-circle"></i></button></td>`; 
+                    tbody.appendChild(tr); 
+                });
+                lucide.createIcons();
+            };
+            
+            const carregarEstado = () => {
+                const estadoSalvo = localStorage.getItem('lifeOS_ultimate');
+                if (estadoSalvo) {
+                    appState = JSON.parse(estadoSalvo); 
+                }
+                if (Object.keys(appState.dadosMensais).length === 0) { const hoje = new Date(); const mesIdAtual = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`; appState.dadosMensais[mesIdAtual] = { transacoes: [] }; appState.mesAtivo = mesIdAtual; }
+                if (!appState.mesAtivo || !appState.dadosMensais[appState.mesAtivo]) { appState.mesAtivo = Object.keys(appState.dadosMensais).sort().pop(); }
+                renderizarUI();
+            };
+
+            const criarProximoMes = () => { const ultimoMesId = Object.keys(appState.dadosMensais).sort().pop(); const [ano, mes] = ultimoMesId.split('-').map(Number); const data = new Date(ano, mes - 1, 1); data.setMonth(data.getMonth() + 1); const proximoMesId = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`; if (!appState.dadosMensais[proximoMesId]) { appState.dadosMensais[proximoMesId] = { transacoes: [] }; appState.mesAtivo = proximoMesId; salvarEstado(); renderizarUI(); } };
+            
+            const adicionarTransacao = (e) => {
+                e.preventDefault();
+                const descricao = document.getElementById('descricao').value;
+                const valor = parseFloat(document.getElementById('valor').value);
+                const data = document.getElementById('data').value;
+                const tipo = document.querySelector('input[name="tipo"]:checked').value;
+                const categoria = tipo === 'saida' ? document.getElementById('categoria').value : null;
+
+                if (!descricao || !valor || !data) { alert('ERRO: Dados de transação inválidos.'); return; }
+                if (!data.startsWith(appState.mesAtivo)) { alert('ERRO: A data da transação não pertence ao mês ativo.'); return; } 
+                
+                appState.dadosMensais[appState.mesAtivo].transacoes.push({ id: Date.now().toString(), descricao, valor, data, tipo, categoria }); 
+                salvarEstado(); renderizarUI();
+                formTransacao.reset();
+                document.getElementById('grupo-categoria').style.display = 'none';
+                document.querySelector('.tipo-transacao-label[for="tipo-entrada"]').classList.add('ativo');
+                document.querySelector('.tipo-transacao-label[for="tipo-saida"]').classList.remove('ativo');
+                document.getElementById('data').value = `${appState.mesAtivo}-01`;
+            };
+
+            const excluirTransacao = (id) => { const transacoes = appState.dadosMensais[appState.mesAtivo].transacoes; appState.dadosMensais[appState.mesAtivo].transacoes = transacoes.filter(t => t.id !== id); salvarEstado(); renderizarUI(); };
+            const atualizarGrafico = (dadosCategorias) => { const gastosCategorias = Object.keys(dadosCategorias).map(id => ({ nome: ESTRUTURA_FINANCEIRA[id].nome, gasto: dadosCategorias[id] })).filter(c => c.gasto > 0); const canvas = document.getElementById('grafico-despesas'); const placeholder = document.getElementById('grafico-placeholder'); if(!canvas || !placeholder) return; if (gastosCategorias.length === 0) { canvas.style.display = 'none'; placeholder.style.display = 'block'; return; } canvas.style.display = 'block'; placeholder.style.display = 'none'; if(meuGrafico) { meuGrafico.data.labels = gastosCategorias.map(c => c.nome); meuGrafico.data.datasets[0].data = gastosCategorias.map(c => c.gasto); meuGrafico.update();} };
+            const inicializarGrafico = () => { const ctx = document.getElementById('grafico-despesas').getContext('2d'); Chart.defaults.color = 'var(--cor-texto-suave)'; Chart.defaults.font.family = "'Inter', sans-serif"; meuGrafico = new Chart(ctx, { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: ['#00f6ff', '#f000b8', '#00ff87', '#fcee0a', '#7f00ff', '#ffac00', '#ff5252'], borderColor: 'var(--cor-fundo-card)', borderWidth: 5, hoverOffset: 10 }] }, options: { responsive: true, maintainAspectRatio: true, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'rectRounded' } }, tooltip: { backgroundColor: 'rgba(17, 24, 39, 0.9)', titleFont: { family: "'Orbitron', sans-serif" }, bodyFont: { family: "'Inter', sans-serif" }, callbacks: { label: (context) => `${context.label}: ${formatarMoeda(context.parsed)}` } } } } }); };
+            
+            btnConfiguracoes.addEventListener('click', () => { secaoConfig.style.display = secaoConfig.style.display === 'none' ? 'block' : 'none'; });
+            togglePensao.addEventListener('change', () => { appState.pagaPensao = togglePensao.checked; salvarEstado(); renderizarUI(); });
+            valorPensaoInput.addEventListener('change', () => { let valor = parseFloat(valorPensaoInput.value); if (isNaN(valor) || valor < 400) { valor = 400; } appState.valorPensao = valor; salvarEstado(); renderizarUI(); });
+            formTransacao.addEventListener('submit', adicionarTransacao);
+            
+            tipoLabels.forEach(label => {
+                label.addEventListener('click', () => {
+                    tipoLabels.forEach(l => l.classList.remove('ativo'));
+                    label.classList.add('ativo');
+                    const tipo = label.querySelector('input').value;
+                    document.getElementById('grupo-categoria').style.display = tipo === 'saida' ? 'flex' : 'none';
+                });
+            });
+
+            document.querySelector('#historico-transacoes').addEventListener('click', (e) => { const botaoExcluir = e.target.closest('.btn-excluir'); if (botaoExcluir) excluirTransacao(botaoExcluir.dataset.id); });
+            
+            inicializarGrafico(); 
+            carregarEstado();
+        });
+    </script>
+</body>
+</html>
