@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REBOOT TECH - Orçamento de Tela</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap');
+
+        :root {
+            --neon-red: #ff003c;
+            --neon-blue: #00f3ff;
+            --dark-bg: #08090a;
+            --card-bg: rgba(15, 15, 20, 0.9);
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            background-image: radial-gradient(circle at 50% 50%, #1a0000 0%, #08090a 100%);
+        }
+
+        .form-container {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 0, 60, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 0 30px rgba(255, 0, 60, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--neon-red), var(--neon-blue));
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--neon-blue);
+            margin: 0;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: transparent;
+            border: 2px solid var(--neon-red);
+            color: var(--neon-red);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-submit:hover {
+            background: var(--neon-red);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(255, 0, 60, 0.5);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #777;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--neon-blue);
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <div class="header">
+        <h1>DIAGNÓSTICO: TELA</h1>
+        <p>Informe os dados para orçamento</p>
+    </div>
+
+    <form id="telaForm">
+        <div class="form-group">
+            <label for="modelo"><i class="fas fa-mobile-alt"></i> Modelo do Aparelho</label>
+            <input type="text" id="modelo" placeholder="Ex: iPhone 11, Samsung S20..." required>
+        </div>
+
+        <div class="form-group">
+            <label for="situacao"><i class="fas fa-crack"></i> O que está acontecendo?</label>
+            <select id="situacao" required>
+                <option value="" disabled selected>Selecione a situação atual...</option>
+                <option value="Apenas o vidro trincado (Imagem e touch 100%)">Apenas o vidro trincado (Imagem e touch normais)</option>
+                <option value="Vidro trincado e touch falhando">Vidro trincado + Touch falhando</option>
+                <option value="Tela com manchas pretas ou listras coloridas">Manchas pretas ou listras na tela</option>
+                <option value="Tela totalmente apagada/preta">Tela totalmente apagada (mas o aparelho liga/vibra)</option>
+                <option value="A tela descolou da carcaça">A tela descolou da carcaça</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-submit">
+            <i class="fab fa-whatsapp"></i> Solicitar Valor
+        </button>
+    </form>
+
+    <a href="links.html" class="back-link"><i class="fas fa-arrow-left"></i> Voltar aos Serviços</a>
+</div>
+
+<script>
+    document.getElementById('telaForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const modelo = document.getElementById('modelo').value;
+        const situacao = document.getElementById('situacao').value;
+        
+        // Monta a mensagem para o WhatsApp
+        const mensagem = `Olá, Reboot Tech! Gostaria de um orçamento para *Troca de Tela*.\n\n📱 *Aparelho:* ${modelo}\n⚠️ *Situação da Tela:* ${situacao}\n\nPodem me passar o valor?`;
+        
+        // Número do WhatsApp da Reboot Tech
+        const numeroWhatsApp = "5511952483521";
+        
+        // Cria o link e redireciona
+        const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
+        window.location.href = url;
+    });
+</script>
+
+</body>
+                  </html>
